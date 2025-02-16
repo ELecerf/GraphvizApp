@@ -34,7 +34,7 @@ def main():
         if not table_input.empty:
             graphviz_code = generate_graphviz_code(table_input, layout)
             graph = graphviz.Source(graphviz_code)
-            st.graphviz_chart(graph)
+            st.graphviz_chart(graph,use_container_width = True)
         else:
             st.warning("Please enter data in the table.")
 
