@@ -11,16 +11,15 @@ def generate_graphviz_code(table_input, layout):
         content = row['ID']
         description = row['Description']
         predecessors = row['Predecessor ID']
-        # Use a safe conversion to string in case Format is missing
-        format_val = str(row['Format']) if pd.notna(row['Format']) else ''
-        shape = 'ellipse' if format_val.strip().lower() == 'ellipse' else 'box'
+        # Use 'ellipse' if Format is specified as ellipse, otherwise default to 'box'
+        shape = 'ellipse' if row['Format'].strip().lower() == 'ellipse' else 'box'
         
         # Add node with label and shape
         graphviz_code += f'  {content} [label="{description}", shape={shape}];\n'
         
         # If there are predecessor IDs, create edges
-        if pd.notna(predecessors) and predecessors:
-            for predecessor in str(predecessors).split():
+        if predecessors:
+            for predecessor in predecessors.split():
                 graphviz_code += f'  {predecessor} -> {content};\n'
     
     graphviz_code += "}"
@@ -52,14 +51,6 @@ def main():
             
             # Display the graph image
             st.image(png_data, use_column_width=True)
-            
-            # Provide a download button for the PNG file
-            st.download_button(
-                label="Download Graph as PNG",
-                data=io.BytesIO(png_data),
-                file_name="graph.png",
-                mime="image/png"
-            )
         else:
             st.warning("Please enter data in the table.")
 
