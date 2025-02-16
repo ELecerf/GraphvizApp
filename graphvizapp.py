@@ -1,10 +1,12 @@
 import streamlit as st
 import graphviz
 import pandas as pd
-
+import io
+ 
+ 
 def generate_graphviz_code(table_input, layout):
     graphviz_code = f"digraph G {{\n  rankdir={layout};\n"
-
+ 
     for index, row in table_input.iterrows():
         content = row['ID']
         description = row['Description']
@@ -14,29 +16,42 @@ def generate_graphviz_code(table_input, layout):
         if predecessors:
             for predecessor in predecessors.split():
                 graphviz_code += f'  {predecessor} -> {content};\n'
-
+ 
     graphviz_code += "}"
     return graphviz_code
-
+ 
+ 
 def main():
     st.title("Graphviz Graph Generator")
-
+ 
     # Create a table input widget using Streamlit's editable dataframe
     table_input = st.data_editor(
         pd.DataFrame(columns=['ID', 'Description', 'Predecessor ID', 'Format']),
         num_rows="dynamic",
         key="table_input"
     )
-
+ 
     layout = st.selectbox("Layout (TB or LR):", ["TB", "LR"])
-
+ 
     if st.button("Generate Graph"):
         if not table_input.empty:
             graphviz_code = generate_graphviz_code(table_input, layout)
             graph = graphviz.Source(graphviz_code)
-            st.graphviz_chart(graph)
+           
+            # Render and display the graph as PNG for better large graph visualization
+            png_data = graph.pipe(format='png')
+            st.image(png_data, use_column_width=True)
+ 
+            # Provide a download button for the PNG
+            btn = st.download_button(
+                label="Download Graph as PNG",
+                data=io.BytesIO(png_data),
+                file_name="graph.png",
+                mime="image/png"
+            )
         else:
             st.warning("Please enter data in the table.")
-
+ 
+ 
 if __name__ == "__main__":
     main()
